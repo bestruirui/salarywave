@@ -1,103 +1,160 @@
-import Image from "next/image";
+"use client"
+
+import { useEffect, useState } from "react"
+import { format } from "date-fns"
+import { zhCN } from "date-fns/locale"
+import { RefreshCw, Wifi, WifiOff } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { SalaryCards } from "@/components/salary-cards"
+import { CountdownCards } from "@/components/countdown-cards"
+import { SettingsDialog } from "@/components/settings-dialog"
+import { Settings, getSettings } from "@/lib/storage"
+import { initializeHolidayData, getHolidayDataStatus } from "@/lib/calculations"
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [settings, setSettings] = useState<Settings | null>(null)
+  const [currentTime, setCurrentTime] = useState(new Date())
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [holidayDataStatus, setHolidayDataStatus] = useState({ loaded: false, dataCount: 0 })
+  const [isInitializing, setIsInitializing] = useState(true)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    // 初始化应用
+    const initializeApp = async () => {
+      // 初始化设置
+      setSettings(getSettings())
+
+      // 初始化节假日数据
+      await initializeHolidayData()
+      setHolidayDataStatus(getHolidayDataStatus())
+      setIsInitializing(false)
+    }
+
+    initializeApp()
+
+    // 仅为显示当前时间的定时器，每秒更新
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      // 重新初始化节假日数据
+      await initializeHolidayData()
+      setHolidayDataStatus(getHolidayDataStatus())
+      setCurrentTime(new Date())
+    } catch (error) {
+      console.error('Refresh failed:', error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  const handleSettingsChange = (newSettings: Settings) => {
+    setSettings(newSettings)
+  }
+
+  if (!settings || isInitializing) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
+          <p className="text-lg text-muted-foreground">
+            {isInitializing ? "正在加载节假日数据..." : "初始化中..."}
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <header className="flex items-center justify-between mb-8">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+              薪动
+            </h1>
+            <div className="flex items-center space-x-2">
+              <Badge variant={holidayDataStatus.loaded ? "default" : "destructive"} className="text-xs">
+                {holidayDataStatus.loaded ? (
+                  <>
+                    <Wifi className="w-3 h-3 mr-1" />
+                    节假日数据已加载 ({holidayDataStatus.dataCount})
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="w-3 h-3 mr-1" />
+                    节假日数据加载失败
+                  </>
+                )}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="sr-only">刷新</span>
+            </Button>
+            <SettingsDialog
+              settings={settings}
+              onSettingsChange={handleSettingsChange}
+            />
+            <ThemeToggle />
+          </div>
+        </header>
+
+        {/* Current Time */}
+        <div className="mb-8 text-center">
+          <div className="text-2xl font-mono text-gray-900 dark:text-gray-100">
+            {format(currentTime, "yyyy年MM月dd日 HH:mm:ss", { locale: zhCN })}
+          </div>
+          <div className="text-sm text-muted-foreground mt-1">
+            {format(currentTime, "EEEE", { locale: zhCN })}
+          </div>
+        </div>
+
+        {/* Salary Cards */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+            💰 工资收入
+          </h2>
+          <SalaryCards settings={settings} />
+        </div>
+
+        <Separator className="my-8" />
+
+        {/* Countdown Cards */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+            ⏰ 倒计时
+          </h2>
+          <CountdownCards settings={settings} />
+        </div>
+
+        {/* Footer */}
+        <footer className="text-center text-sm text-muted-foreground mt-16">
+          <p>© 2024 薪动 - 让每一分钟的工作都有意义</p>
+          {holidayDataStatus.loaded && (
+            <p className="mt-1">节假日数据来源：timor.tech API (2025年)</p>
+          )}
+        </footer>
+      </div>
     </div>
-  );
+  )
 }
