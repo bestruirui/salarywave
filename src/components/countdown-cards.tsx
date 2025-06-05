@@ -60,7 +60,7 @@ export function CountdownCards({ settings }: CountdownCardsProps) {
                 </CardHeader>
                 <CardContent className="relative pb-10 h-20">
                     <div className="text-lg font-bold text-red-600 dark:text-red-400 leading-tight">
-                        {workEnd !== null ? formatCountdown(workEnd) : '今天不上班'}
+                        {workEnd !== null ? formatCountdown(workEnd, '🎉 下班快乐！') : '今天不上班'}
                     </div>
                     <Badge variant="secondary" className="absolute bottom-0 left-6 right-6">
                         {settings.workEndTime} 下班
