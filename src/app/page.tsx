@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { format } from "date-fns"
 import { zhCN } from "date-fns/locale"
-import { RefreshCw, Wifi, WifiOff } from "lucide-react"
+import { RefreshCw, Wifi, WifiOff, Github } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -110,6 +110,20 @@ export default function Home() {
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span className="sr-only">刷新</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              asChild
+            >
+              <a
+                href="https://github.com/bestruirui/salarywave"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Github className="h-4 w-4" />
+                <span className="sr-only">GitHub</span>
+              </a>
             </Button>
             <SettingsDialog
               settings={settings}
