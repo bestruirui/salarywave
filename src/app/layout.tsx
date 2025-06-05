@@ -15,13 +15,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "工资追踪器",
+  title: "薪动 - 工资追踪器",
   description: "实时追踪您的工资收入，支持倒计时和节假日功能",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "工资追踪器",
+    title: "薪动",
+    startupImage: "/icons/icon.png",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-title": "薪动",
+    "application-name": "薪动",
+    "msapplication-TileColor": "#000000",
+    "msapplication-tap-highlight": "no",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon.ico", sizes: "any" },
+      { url: "/icons/icon.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
 };
 
@@ -29,6 +48,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "#09090b" },
